@@ -71,14 +71,18 @@ def read_frames(data):
     masking_key = []
     if masked:
         for i in range(4):
+            print(frames[content_length_index + i + 1])
             masking_key.append(int(frames[content_length_index + i + 1], base=2))
         print(f"Masking Key: {masking_key}")
     payload = []
-    payload_index = content_length + 4
+    payload_index = content_length_index + 4
     print(frames[payload_index:])
-    for i in range(content_length):
-        print(int(frames[payload_index + i + 1], base=2))
-        print(int(frames[payload_index + i + 1], base=2) ^ (i % len(masking_key)))
+    for i, frame in enumerate(frames[payload_index:]):
+        print(
+            int(frame, base=2),
+            masking_key[i % len(masking_key)],
+            int(frame, base=2) ^ masking_key[i % len(masking_key)],
+        )
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
