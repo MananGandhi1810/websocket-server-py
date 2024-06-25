@@ -67,22 +67,22 @@ def read_frames(data):
         if content_length == 127:
             content_length += int(frames[3], base=2) + int(frames[4], base=2)
             content_length_index += 2
-    print(f"Content Length: {content_length}")
     masking_key = []
     if masked:
         for i in range(4):
-            print(frames[content_length_index + i + 1])
             masking_key.append(int(frames[content_length_index + i + 1], base=2))
-        print(f"Masking Key: {masking_key}")
     payload = []
     payload_index = content_length_index + 4
-    print(frames[payload_index:])
-    for i, frame in enumerate(frames[payload_index:]):
-        print(
-            int(frame, base=2),
-            masking_key[i % len(masking_key)],
-            int(frame, base=2) ^ masking_key[i % len(masking_key)],
+    for i in range(content_length):
+        payload.append(
+            int(
+                frames[payload_index + i + 1],
+                base=2,
+            )
+            ^ (masking_key[i % len(masking_key)] if masked else 0)
         )
+    print(f"Decoded Payload: {payload}")
+    print("".join([chr(x) for x in payload]))
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
